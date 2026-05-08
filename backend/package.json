@@ -1,21 +1,27 @@
 {
-  "name": "team-task-manager-backend",
+  "name": "team-task-manager-frontend",
   "version": "1.0.0",
-  "main": "src/server.js",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
-    "build": "echo Backend build complete",
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0 --port $PORT"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.18.3",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.3.1"
+    "@vitejs/plugin-react": "^4.3.4",
+    "axios": "latest",
+    "vite": "^5.4.11",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-router-dom": "latest"
   },
   "devDependencies": {
-    "nodemon": "^3.1.0"
+    "autoprefixer": "latest",
+    "postcss": "latest",
+    "tailwindcss": "^3.4.17"
   }
 }
