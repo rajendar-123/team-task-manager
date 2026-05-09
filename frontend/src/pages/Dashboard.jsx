@@ -7,7 +7,7 @@ export default function Dashboard() {
 
   const loadTasks = async () => {
     const res = await api.get("/tasks");
-    setTasks(res.data || []);
+    setTasks(Array.isArray(res.data) ? res.data : res.data.tasks || []);
   };
 
   useEffect(() => {
