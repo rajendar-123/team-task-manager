@@ -3,51 +3,109 @@ import api from "../api/axios";
 
 export default function Dashboard() {
   const [tasks, setTasks] = useState([]);
-  const [error, setError] = useState("");
+  const [title, setTitle] = useState("");
+
+  const loadTasks = async () => {
+    const res = await api.get("/tasks");
+    setTasks(res.data || []);
+  };
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const res = await api.get("/tasks");
-        setTasks(Array.isArray(res.data) ? res.data : []);
-      } catch (err) {
-        setError(err.response?.data?.message || "Unable to load tasks");
-      }
-    };
-
-    fetchTasks();
+    loadTasks();
   }, []);
 
-  const completed = tasks.filter((t) => t.status === "done").length;
-  const overdue = tasks.filter(
-    (t) => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== "done"
-  ).length;
+  const addTask = async () => {
+    if (!title.trim()) return alert("Enter task title");
+
+    await api.post("/tasks", {
+      title,
+      description: "Created from website",
+      status: "todo"
+    });
+
+    setTitle("");
+    loadTasks();
+  };
+
+  const updateStatus = async (id, status) => {
+    await api.put(`/tasks/${id}`, { status });
+    loadTasks();
+  };
+
+  const deleteTask = async (id) => {
+    await api.delete(`/tasks/${id}`);
+    loadTasks();
+  };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+    <div className="min-h-screen bg-gray-100 p-6">
+      <h1 className="text-3xl font-bold mb-6">Team Task Manager</h1>
 
-      {error && (
-        <div className="bg-red-100 text-red-700 p-3 rounded mb-4">
-          {error}
-        </div>
-      )}
+      <div className="bg-white p-5 rounded shadow mb-6">
+        <h2 className="text-xl font-bold mb-3">Add Task</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-5 rounded shadow">
-          <h2 className="text-gray-500">Total Tasks</h2>
-          <p className="text-3xl font-bold">{tasks.length}</p>
+        <div className="flex gap-2">
+          <input
+            className="border p-2 rounded w-full"
+            placeholder="Enter task title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+
+          <button
+            onClick={addTask}
+            className="bg-blue-600 text-white px-4 rounded"
+          >
+            Add
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="bg-white p-4 rounded shadow">
+          Total: {tasks.length}
         </div>
 
-        <div className="bg-white p-5 rounded shadow">
-          <h2 className="text-gray-500">Completed Tasks</h2>
-          <p className="text-3xl font-bold">{completed}</p>
+        <div className="bg-white p-4 rounded shadow">
+          Done: {tasks.filter((t) => t.status === "done").length}
         </div>
 
-        <div className="bg-white p-5 rounded shadow">
-          <h2 className="text-gray-500">Overdue Tasks</h2>
-          <p className="text-3xl font-bold">{overdue}</p>
+        <div className="bg-white p-4 rounded shadow">
+          Pending: {tasks.filter((t) => t.status !== "done").length}
         </div>
+      </div>
+
+      <div className="space-y-3">
+        {tasks.map((task) => (
+          <div
+            key={task._id}
+            className="bg-white p-4 rounded shadow flex justify-between items-center"
+          >
+            <div>
+              <h3 className="font-bold">{task.title}</h3>
+              <p className="text-sm text-gray-500">{task.status}</p>
+            </div>
+
+            <div className="flex gap-2">
+              <select
+                className="border p-2 rounded"
+                value={task.status}
+                onChange={(e) => updateStatus(task._id, e.target.value)}
+              >
+                <option value="todo">Todo</option>
+                <option value="in-progress">In Progress</option>
+                <option value="done">Done</option>
+              </select>
+
+              <button
+                onClick={() => deleteTask(task._id)}
+                className="bg-red-500 text-white px-3 rounded"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
